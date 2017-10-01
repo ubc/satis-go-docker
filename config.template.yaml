@@ -1,0 +1,6 @@
+bind: ${SATIS_GO_BIND}
+dbpath: ${SATIS_GO_DB_PATH}
+repouipath: ${SATIS_GO_REPOUI_PATH}
+adminuipath: /opt/satis-go/admin-ui
+reponame: ${SATIS_GO_REPO_NAME}
+repohost: ${SATIS_GO_REPO_HOST}
