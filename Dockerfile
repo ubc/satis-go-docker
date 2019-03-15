@@ -1,3 +1,9 @@
+FROM golang:1.12 as builder
+RUN go get -d -v github.com/benschw/satis-go
+WORKDIR /go/src/github.com/benschw/satis-go/
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o satis-go .
+
+
 FROM composer/satis
 
 ENV SATIS_GO_BIND 0.0.0.0:8080
@@ -51,12 +57,11 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
         "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
 
 # install satis-go
-RUN mkdir -p /opt/satis-go && \
-    wget -qO- https://github.com/benschw/satis-go/releases/download/0.1.1/satis-go-`uname`-`uname -m`.gz | \
-        gunzip > /opt/satis-go/satis-go && \
-    chmod +x /opt/satis-go/satis-go && \
-    wget -qO-  https://github.com/benschw/satis-admin/releases/download/0.1.1/admin-ui.tar.gz | \
-        tar xzv -C /opt/satis-go/
+RUN mkdir -p /opt/satis-go /opt/satis-go/admin-ui
+COPY --from=builder /go/src/github.com/benschw/satis-go/satis-go /opt/satis-go/
+RUN chmod +x /opt/satis-go/satis-go && \
+    wget -qO- https://github.com/benschw/satis-admin/archive/master.tar.gz | \
+        tar xzv --strip-components=1 -C /opt/satis-go/admin-ui
 
 ADD entrypoint.sh /entrypoint.sh
 ADD config.template.yaml /opt/satis-go/config.template.yaml
