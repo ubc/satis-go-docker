@@ -56,6 +56,6 @@ ADD config.template.yaml /opt/satis-go/config.template.yaml
 
 EXPOSE 8080
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "-g", "--", "/entrypoint.sh"]
 
 CMD ["/opt/satis-go/satis-go"]
