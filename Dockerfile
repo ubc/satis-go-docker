@@ -22,6 +22,7 @@ ENV SATIS_GO_REPO_NAME "My Satis"
 ENV SATIS_GO_REPO_HOST http://localhost:8080
 ENV PATH="/satis/bin:${PATH}"
 ENV LANG=C.UTF-8
+ENV TINI_VERSION v0.18.0
 
 # based on https://github.com/frol/docker-alpine-glibc/blob/master/Dockerfile
 # also added envsubst based on https://github.com/cirocosta/alpine-envsubst/blob/master/Dockerfile
@@ -65,6 +66,8 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
         "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
 
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
 # install satis-go
 RUN mkdir -p /opt/satis-go /opt/satis-go/admin-ui
 COPY --from=builder /go/src/github.com/benschw/satis-go/satis-go /opt/satis-go/
@@ -78,6 +81,6 @@ ADD config.template.yaml /opt/satis-go/config.template.yaml
 
 EXPOSE 8080
 
-ENTRYPOINT ["/sbin/tini", "-g", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/tini", "-g", "--", "/entrypoint.sh"]
 
 CMD ["/opt/satis-go/satis-go"]
