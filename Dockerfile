@@ -4,6 +4,15 @@ WORKDIR /go/src/github.com/benschw/satis-go/
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o satis-go .
 
 
+FROM node as builder1
+RUN mkdir -p /opt/satis-go/admin-ui && \
+    wget -qO- https://github.com/benschw/satis-admin/archive/master.tar.gz | \
+        tar xzv --strip-components=1 -C /opt/satis-go/admin-ui
+WORKDIR /opt/satis-go/admin-ui
+RUN npm i bower && \
+    node_modules/.bin/bower i --allow-root
+
+
 FROM composer/satis
 
 ENV SATIS_GO_BIND 0.0.0.0:8080
@@ -60,8 +69,9 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
 RUN mkdir -p /opt/satis-go /opt/satis-go/admin-ui
 COPY --from=builder /go/src/github.com/benschw/satis-go/satis-go /opt/satis-go/
 RUN chmod +x /opt/satis-go/satis-go && \
-    wget -qO- https://github.com/benschw/satis-admin/archive/master.tar.gz | \
+    wget -qO- https://github.com/benschw/satis-admin/releases/download/0.1.1/admin-ui.tar.gz | \
         tar xzv --strip-components=1 -C /opt/satis-go/admin-ui
+COPY --from=builder1 /opt/satis-go/admin-ui/bower_components /opt/satis-go/admin-ui/bower_components
 
 ADD entrypoint.sh /entrypoint.sh
 ADD config.template.yaml /opt/satis-go/config.template.yaml
