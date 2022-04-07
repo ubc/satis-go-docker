@@ -1,7 +1,7 @@
-FROM golang:1.12 as builder
-RUN go get -d -v github.com/benschw/satis-go
+FROM golang:1.18 as builder
+RUN go install -v github.com/benschw/satis-go@latest
 WORKDIR /go/src/github.com/benschw/satis-go/
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o satis-go .
+#RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o satis-go .
 
 
 FROM node as builder1
@@ -70,7 +70,7 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 # install satis-go
 RUN mkdir -p /opt/satis-go /opt/satis-go/admin-ui
-COPY --from=builder /go/src/github.com/benschw/satis-go/satis-go /opt/satis-go/
+COPY --from=builder /go/bin/satis-go /opt/satis-go/
 RUN chmod +x /opt/satis-go/satis-go && \
     wget -qO- https://github.com/benschw/satis-admin/releases/download/0.1.1/admin-ui.tar.gz | \
         tar xzv --strip-components=1 -C /opt/satis-go/admin-ui
