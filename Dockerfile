@@ -9,7 +9,7 @@ RUN mkdir -p /opt/satis-go/admin-ui && \
     wget -qO- https://github.com/benschw/satis-admin/archive/master.tar.gz | \
         tar xzv --strip-components=1 -C /opt/satis-go/admin-ui
 WORKDIR /opt/satis-go/admin-ui
-RUN npm i bower && \
+RUN npm i bower --only=prod && \
     node_modules/.bin/bower i --allow-root
 
 
